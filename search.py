@@ -1,4 +1,5 @@
 from util import *
+from searchproblem import *
 
 class Node:
 	def __init__(self, state, path):
@@ -35,3 +36,20 @@ def depth_first_search(problem):
 def breadth_first_search(problem):
 	fringe = Queue()
 	return general_search(problem, fringe)
+
+def ucs(problem):
+	fringe = PriorityQueue(lambda node: len(node["path"]))
+	return general_search(problem, fringe)
+
+def Astar(problem, heuristic):
+	fringe = PriorityQueue(lambda node: len(node["path"]) + heuristic(node, problem))
+	return general_search(problem, fringe)
+
+def null_heuristic(node, problem):
+	return 0
+
+def euclidean_heuristic(node, problem):
+	if isinstance(problem, BoardSearchProblem):
+		return abs(node["state"][0]-problem.goal[0]) + abs(node["state"][1]-problem.goal[1])
+	else:
+		return 0
