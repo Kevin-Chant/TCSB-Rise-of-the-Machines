@@ -11,9 +11,15 @@ class AutoPacman(Pacman):
 	def __init__(self,i,j,game):
 		super(AutoPacman, self).__init__(i,j,game)
 		self.isAI = True
+		self.directions = []
+		self.directionIndex = 0
 
 	def AI(self, game):
-		self.direction = None
+		if self.directionIndex >= len(self.directions):
+			self.direction=None
+		else:
+			self.direction = self.directions[self.directionIndex]
+			self.directionIndex += 1
 
 class GoWestPacman(AutoPacman):
 	'''
@@ -21,9 +27,8 @@ class GoWestPacman(AutoPacman):
 	'''
 	def __init__(self,i,j,game):
 		super(GoWestPacman, self).__init__(i,j,game)
+		self.directions = ["West"] * 100
 
-	def AI(self, game):
-		self.direction = "West"
 
 class RandomPacman(AutoPacman):
 	'''
@@ -41,12 +46,8 @@ class TinyMazePacman(AutoPacman):
 	'''
 	def __init__(self, i, j, game):
 		super(TinyMazePacman, self).__init__(i,j,game)
-		self.directionIndex = 0
 		self.directions = ["South", "South", "South", "South", "West", "West", "South", "West", "West", "South"]
 	
-	def AI(self, game):
-		self.direction = self.directions[self.directionIndex]
-		self.directionIndex += 1
 
 class BFSPacman(AutoPacman):
 	'''
@@ -54,19 +55,15 @@ class BFSPacman(AutoPacman):
 	'''
 	def __init__(self, i, j, game):
 		super(BFSPacman, self).__init__(i,j,game)
-	
-	def AI(self, game):
 		if not isinstance(game.problem, BoardSearchProblem):
-			self.direction = None
+			self.directions = []
 		else:
-			start = (self.i, self.j)
-			target = game.problem.goal
-			search_problem = BoardSearchProblem(start, target, game.board, self.passable_blocks)
-			path_to_target = breadth_first_search(search_problem)
+			path_to_target = breadth_first_search(game.problem)
 			if path_to_target:
-				self.direction = path_to_target[0]
+				self.directions = path_to_target
 			else:
-				self.direction = None
+				self.directions = []
+	
 
 class UCSPacman(AutoPacman):
 	'''
@@ -74,37 +71,48 @@ class UCSPacman(AutoPacman):
 	'''
 	def __init__(self, i, j, game):
 		super(UCSPacman, self).__init__(i,j,game)
-	
-	def AI(self, game):
 		if not isinstance(game.problem, BoardSearchProblem):
-			self.direction = None
+			self.directions = []
 		else:
-			start = (self.i, self.j)
-			target = game.problem.goal
-			search_problem = BoardSearchProblem(start, target, game.board, self.passable_blocks)
-			path_to_target = ucs(search_problem)
+			path_to_target = ucs(game.problem)
 			if path_to_target:
-				self.direction = path_to_target[0]
+				self.directions = path_to_target
 			else:
-				self.direction = None
+				self.directions = []
+	
 
-class AstarPacman(AutoPacman):
+class AStarPacman(AutoPacman):
 	'''
 	Searches for the optimal path to the target (only works for mazes where the problem is a BoardSearchProblem)
 	'''
 	def __init__(self, i, j, game, heuristic=null_heuristic):
-		super(AstarPacman, self).__init__(i,j,game)
-		self.heuristic = null_heuristic
-	
-	def AI(self, game):
-		if not isinstance(game.problem, BoardSearchProblem):
-			self.direction = None
+		super(AStarPacman, self).__init__(i,j,game)
+		startnode = Node((1,1),[])
+		if not isinstance(game.problem, BoardSearchProblem) and not isinstance(game.problem, EatAllFoodProblem):
+			self.directions = []
 		else:
-			start = (self.i, self.j)
-			target = game.problem.goal
-			search_problem = BoardSearchProblem(start, target, game.board, self.passable_blocks)
-			path_to_target = Astar(search_problem, self.heuristic)
+			path_to_target = Astar(game.problem, heuristic)
 			if path_to_target:
-				self.direction = path_to_target[0]
+				self.directions = path_to_target
 			else:
-				self.direction = None
+				self.directions = []
+
+class GreedyFoodPacman(AutoPacman):
+	'''
+	Greedily searches for the nearest food
+	'''
+	def __init__(self, i, j, game, heuristic=null_heuristic):
+		super(GreedyFoodPacman, self).__init__(i,j,game)
+		self.directionIndex = 0
+		if not isinstance(game.problem, EatAllFoodProblem):
+			self.directions = []
+		else:
+			path_to_target = greedySearch(game.problem, heuristic)
+			if path_to_target:
+				self.directions = path_to_target
+			else:
+				self.directions = []
+
+
+
+

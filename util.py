@@ -84,6 +84,10 @@ class Board:
                 if self.grid[i][j] == "spot":
                     self.foodgrid[i][j] = True
 
+    def fillcorners(self):
+        for i,j in [(1,1), (1,self.width-2), (self.height-2, 1), (self.height-2, self.width-2)]:
+            self.foodgrid[i][j] = True
+
     def create_house(self):
         if self.width < 10:
             raise ValueError("Cannot create house in board with less than 10 width")

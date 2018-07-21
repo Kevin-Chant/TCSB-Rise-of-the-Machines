@@ -73,11 +73,11 @@ board_colors = {"wall": (64, 96, 191),
 				"house": (77, 51, 153),
 				"house_door": (159, 140, 217),
 				"food": (255, 255, 255)
-				}
+			}
 bg_color = (0,0,0)
 
 class App:
-	def __init__(self, food=True, problem=None, agent=None):
+	def __init__(self, food=True, problem=None, agent=None, heuristic=None):
 		self._running = True
 		self.screen = None
 		if not problem:
@@ -89,10 +89,15 @@ class App:
 		self.board_offset = (0,100)
 		self.spot_size = 40
 		self.size = self.width, self.height = self.spot_size * self.board.width + self.board_offset[0], self.spot_size * self.board.height + self.board_offset[1]
+
 		if not agent:
-			self.player = Pacman(*self.problem.getStartPos(), problem)
+			agent = Pacman
+
+		if heuristic and agent != Pacman:
+			self.player = agent(*self.problem.getStartPos(), self, heuristic=heuristic)
 		else:
-			self.player = agent(*self.problem.getStartPos(), problem)
+			self.player = agent(*self.problem.getStartPos(), self)
+
 		self.score = 0
 		self.tickcounter = 0
 		self.entities = [self.player]
@@ -115,13 +120,15 @@ class App:
 		if event.type == pygame.QUIT:
 			self._running = False
 		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_LEFT:
+			if event.key == pygame.K_F4 and (pygame.key.get_pressed()[K_LALT] or pygame.key.get_pressed()[K_RALT]):
+				self._running = False
+			elif event.key == pygame.K_LEFT and not self.player.isAI:
 				self.player.direction = "West"
-			elif event.key == pygame.K_RIGHT:
+			elif event.key == pygame.K_RIGHT and not self.player.isAI:
 				self.player.direction = "East"
-			elif event.key == pygame.K_UP:
+			elif event.key == pygame.K_UP and not self.player.isAI:
 				self.player.direction = "North"
-			elif event.key == pygame.K_DOWN:
+			elif event.key == pygame.K_DOWN and not self.player.isAI:
 				self.player.direction = "South"
 
 	def on_loop(self):
@@ -200,13 +207,14 @@ class App:
 		self.on_cleanup()
  
 def main(**kwargs):
-	theApp = App(problem=kwargs.get("problem",None),agent=kwargs.get("agent",None))
+	theApp = App(problem=kwargs.get("problem",None),agent=kwargs.get("agent",None),heuristic=kwargs.get("heuristic",None))
 	theApp.on_execute()
 
 if __name__ == "__main__" :
 	# Keyword arguments expected:
 	# -maze=mazename
 	# -agent=agentname
+	# -heuristic=heuristicname
 	kwargs = {}
 	if len(sys.argv) > 1:
 		for arg in sys.argv[1:]:
@@ -214,4 +222,6 @@ if __name__ == "__main__" :
 				kwargs["problem"] = eval(arg.split("=")[1] + "problem")
 			elif "-agent=" in arg:
 				kwargs["agent"] = eval(arg.split("=")[1])
+			elif "-heuristic=" in arg:
+				kwargs["heuristic"] = eval(arg.split("=")[1] + "_heuristic")
 	main(**kwargs)
