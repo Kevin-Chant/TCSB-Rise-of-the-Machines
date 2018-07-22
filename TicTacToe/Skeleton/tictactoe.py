@@ -73,30 +73,27 @@ player_functions = {'x': max, 'o': min}
 def value(grid, player, depth, maxdepth):
 	# Terminal conditions - stop recursing and return a value
 	if is_win(grid, player) or is_win(grid, other(player)) or is_tie(grid) or depth >= maxdepth:
-		return evaluation_function(grid)
-	# Recursively get the value of each child
-	children = get_successors(grid, player)
-	child_values = []
-	for i in range(len(children)):
-		child_values.append(value(children[i], other(player), depth+1, maxdepth))
-	# Choose the best score for this player
-	comparison = player_functions[player]
-	return comparison(child_values)
+		"*** YOUR CODE HERE ***"
+	else:
+		# Recursively get the value of each child
+		"*** YOUR CODE HERE ***"
+	
+		# Choose the best score for this player
+		"*** YOUR CODE HERE ***"
+	raise NotImplementedError()
 
 # Uses value() to get the score for each of grid's children then chooses the best child
 def minimax(grid, player, maxdepth):
 	# Terminal conditions - stop recursing and return a value
-	if is_win(grid, player) or is_win(grid, other(player)) or is_tie(grid):
-		raise ValueError("Cannot choose next best move when game has terminated")
-	# Recursively get the value of each child
-	children = get_successors(grid, player)
-	child_values = []
-	for i in range(len(children)):
-		child_values.append(value(children[i], other(player), 0, maxdepth))
-	# Choose the best child for this player
-	comparison = player_functions[player]
-	bestvalue = comparison(child_values)
-	return children[child_values.index(bestvalue)]	
+	if is_win(grid, player) or is_win(grid, other(player)) or is_tie(grid) or depth >= maxdepth:
+		"*** YOUR CODE HERE ***"
+	else:
+		# Recursively get the value of each child
+		"*** YOUR CODE HERE ***"
+	
+		# Choose the best child for this player
+		"*** YOUR CODE HERE ***"
+	raise NotImplementedError()
 
 # Used to reset the grid after the game ends
 def empty_grid():
