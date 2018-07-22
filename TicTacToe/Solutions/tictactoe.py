@@ -1,6 +1,10 @@
 import pygame
 from pygame.locals import *
- 
+
+pygame.font.init()
+titlefont = pygame.font.SysFont('Arial', 60)
+menufont = pygame.font.SysFont('Arial', 30)
+
 def is_win(grid, player):
 	for row in range(3):
 		if grid[row] == [player,player,player]:
@@ -71,15 +75,23 @@ def minimax(grid, player, maxdepth):
 	bestvalue = comparison(child_values)
 	return children[child_values.index(bestvalue)]	
 
+def empty_grid():
+	return [["","",""],["","",""],["","",""]]
+
 class App:
 	def __init__(self):
 		self._running = True
 		self.screen = None
-		self.size = self.weight, self.height = 600, 600
-		self.grid = [["","",""],["","",""],["","",""]]
+		self.size = self.width, self.height = 600, 600
+		self.grid = empty_grid()
 		self.player = "x"
-		self.difficulty = 4
- 
+		self.difficulty = 1
+		self.menu = True
+		self.gameover = False
+		self.waitcounter = 0
+		self.clock = pygame.time.Clock()
+		self.message = None
+
 	def on_init(self):
 		pygame.init()
 		self.screen = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
@@ -91,51 +103,106 @@ class App:
 			self._running = False
 		if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
 			x,y = pygame.mouse.get_pos()
-			i,j = 0,0
-			if x < 200:
-				j = 0
-			elif x > 400:
-				j = 2
+			if self.menu:
+				if x > 225 and x < 375:
+					if y > 100 and y < 175:
+						self.menu = False
+					if y > 400 and y < 475:
+						self._running = False
+				if x > 125 and x < 275:
+					if y > 250 and y < 325:
+						self.difficulty = 1
+				if x > 325 and x < 475:
+					if y > 250 and y < 325:
+						self.difficulty = 4
 			else:
-				j = 1
-			if y < 200:
-				i = 0
-			elif y > 400:
-				i = 2
-			else:
-				i = 1
-			if self.grid[i][j] == "":
-				self.grid[i][j] = self.player
-				if is_win(self.grid, self.player):
-					print("You win!")
-					exit(0)
-				if is_tie(self.grid):
-					print("Cat's game!")
-					exit(0)
-				self.grid = minimax(self.grid, other(self.player), self.difficulty)
-				if is_win(self.grid, other(self.player)):
-					print("You lose!")
-					exit(0)
-				if is_tie(self.grid):
-					print("Cat's game!")
-					exit(0)
+				if not self.gameover:
+					x,y = pygame.mouse.get_pos()
+					i,j = 0,0
+					if x < 200:
+						j = 0
+					elif x > 400:
+						j = 2
+					else:
+						j = 1
+					if y < 200:
+						i = 0
+					elif y > 400:
+						i = 2
+					else:
+						i = 1
+					if self.grid[i][j] == "":
+						self.grid[i][j] = self.player
+						if is_win(self.grid, self.player):
+							self.message = "You Win!"
+							self.gameover=True
+							self.grid = empty_grid()
+							return
+						if is_tie(self.grid):
+							self.message = "Cat's game"
+							self.gameover=True
+							self.grid = empty_grid()
+							return
+						self.grid = minimax(self.grid, other(self.player), self.difficulty)
+						if is_win(self.grid, other(self.player)):
+							self.message = "You Lose!"
+							self.gameover=True
+							self.grid = empty_grid()
+							return
+						if is_tie(self.grid):
+							self.message = "Cat's game"
+							self.gameover=True
+							self.grid = empty_grid()
+							return
 
 
 	def on_loop(self):
-		pass
+		self.clock.tick(60)
+		if self.gameover:
+			self.waitcounter += 1
+			if self.waitcounter == 60 * 4:
+				self.waitcounter = 0
+				self.gameover = False
+				self.menu = True
+				self.message = None
+
 	def on_render(self):
 		self.screen.fill((255,255,255))
-		pygame.draw.line(self.screen, (0,0,0), (200,0), (200,600))
-		pygame.draw.line(self.screen, (0,0,0), (400,0), (400,600))
-		pygame.draw.line(self.screen, (0,0,0), (0,200), (600,200))
-		pygame.draw.line(self.screen, (0,0,0), (0,400), (600,400))
-		for row in range(3):
-			for col in range(3):
-				if self.grid[row][col] == "o":
-					pygame.draw.circle(self.screen, (0,0,0), (col*200+100, row*200+100), 75, 1)
-				if self.grid[row][col] == "x":
-					pygame.draw.line(self.screen, (0,0,0), (col*200-53+100, row*200-53+100), (col*200+53+100,row*200+53+100))
-					pygame.draw.line(self.screen, (0,0,0), (col*200+53+100, row*200-53+100), (col*200-53+100,row*200+53+100))
+		if not self.menu:
+			if self.message:
+				messagesurface = titlefont.render(self.message, False, (0,0,0))
+				self.screen.blit(messagesurface, (self.width//2 - messagesurface.get_width()//2, self.height//2 - messagesurface.get_height()//2))
+			else:
+				pygame.draw.line(self.screen, (0,0,0), (200,0), (200,600))
+				pygame.draw.line(self.screen, (0,0,0), (400,0), (400,600))
+				pygame.draw.line(self.screen, (0,0,0), (0,200), (600,200))
+				pygame.draw.line(self.screen, (0,0,0), (0,400), (600,400))
+				for row in range(3):
+					for col in range(3):
+						if self.grid[row][col] == "o":
+							pygame.draw.circle(self.screen, (0,0,0), (col*200+100, row*200+100), 75, 1)
+						if self.grid[row][col] == "x":
+							pygame.draw.line(self.screen, (0,0,0), (col*200-53+100, row*200-53+100), (col*200+53+100,row*200+53+100))
+							pygame.draw.line(self.screen, (0,0,0), (col*200+53+100, row*200-53+100), (col*200-53+100,row*200+53+100))
+		else:
+			titlesurface = titlefont.render("Tic Tac Toe", False, (0,0,0))
+			self.screen.blit(titlesurface, (180, 10))
+			# Play button
+			pygame.draw.rect(self.screen, (200,200,200), (225, 100, 150, 75))
+			playsurface = menufont.render("Play", False, (0,0,0))
+			self.screen.blit(playsurface, (280,120))
+			# Regular difficulty
+			pygame.draw.rect(self.screen, (100,200,100), (125, 250, 150, 75))
+			playsurface = menufont.render("Regular", False, (0,0,0))
+			self.screen.blit(playsurface, (150,270))
+			# Impossible difficulty
+			pygame.draw.rect(self.screen, (200,100,100), (325, 250, 150, 75))
+			playsurface = menufont.render("Impossible", False, (0,0,0))
+			self.screen.blit(playsurface, (350,270))
+			# Quit button
+			pygame.draw.rect(self.screen, (200,200,200), (225, 400, 150, 75))
+			playsurface = menufont.render("Quit", False, (0,0,0))
+			self.screen.blit(playsurface, (280,420))
 		pygame.display.update()
 	
 	def on_cleanup(self):
