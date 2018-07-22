@@ -50,35 +50,49 @@ tinycorners.fillcorners()
 tinycornerstart = ((3,3),(False, False, False, False))
 tinycornersproblem = CornersProblem(tinycornerstart,tinycorners)
 
+mediumcornerspattern = [
+						["wall", 31],
+						["wall", 1,7,1,1,1,1,1,15,1,1,1],
+						["wall", 1,7,1,1,1,1,7,1,7,1,1,1,1],
+						["wall", 1,7,1,9,1,5,1,1,1,3,1],
+						["wall", 5,1,5,1,3,1,3,1,5,1,1,1,3],
+						["wall", 1,3,1,1,1,1,1,1,1,3,1,5,1,5,1,3,1],
+						["wall", 1,1,3,1,1,1,1,1,1,1,9,1,3,1,3,1,1],
+						["wall", 1,7,1,5,3,5,1,1,1,1,1,3,1],
+						["wall", 3,1,1,1,7,1,5,1,3,1,1,1,1,1,1,1,1],
+						["wall", 1,1,1,11,3,5,1,5,1,1,1],
+						["wall", 1,1,1,1,5,1,1,1,5,1,1,1,3,1,3,1,1,1,1],
+						["wall", 1,3,1,5,1,7,1,1,1,3,1,1,3,1,1],
+						["wall", 1,3,1,1,5,7,1,1,3,1,1,1,3,1,1],
+						["wall", 1,3,1,1,5,7,1,1,3,1,1,5,1],
+						["wall", 31],
+						]
+mediumcornersgrid = maze_generator(mediumcornerspattern)
+mediumcorners = Board(maze=mediumcornersgrid, house=False)
+mediumcorners.fillcorners()
+mediumcornerstart = ((1,2), (False, False, False, False))
+mediumcornersproblem = CornersProblem(mediumcornerstart, mediumcorners)
 
-smallfoodgrid = [
-				["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-				["wall", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "wall"],
-				["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-				]
-smallfood = Board(maze=smallfoodgrid, house=False)
-smallfoodstart = ((1,4),smallfood)
-smallfood.foodgrid[1][1] = True
-smallfoodproblem = EatAllFoodProblem(smallfoodstart, smallfood)
+tinyfoodpattern = [
+					["wall", 9],
+					["wall", 1,7,1],
+					["wall", 4,1,2,1,1],
+					["wall", 1,7,1],
+					["wall", 1,1,2,1,2,1,1],
+					["wall", 1,1,1,5,1],
+					["wall", 9]
+					]
+tinyfoodgrid = maze_generator(tinyfoodpattern)
+tinyfood = Board(maze=tinyfoodgrid, house=False)
+for i,j in [(4,1),(5,1),(5,3)]:
+	tinyfood.foodgrid[i][j] = True
+tinyfoodproblem = EatAllFoodProblem(((3,4),tinyfood),tinyfood)
 
-
-
-smallmazegrid = [
-				["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-				["wall", "spot", "spot", "spot", "spot", "spot", "wall", "spot", "spot", "spot", "spot", "spot", "wall", "spot", "spot", "spot", "spot", "spot", "wall"],
-				["wall", "spot", "wall", "wall", "wall", "spot", "wall", "spot", "wall", "wall", "wall", "spot", "wall", "spot", "wall", "wall", "wall", "spot", "wall"],
-				["wall", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "wall"],
-				["wall", "spot", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "spot", "wall"],
-				["wall", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "wall"],
-				["wall", "spot", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "spot", "wall"],
-				["wall", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "spot", "wall"],
-				["wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-				]
-smallmaze = Board(maze=smallmazegrid, house=False, filled=True)
-smallmazeproblem = EatAllFoodProblem(((7,1), smallmaze), smallmaze)
-
-regularmaze = Board(filled=True, house=True)
-regularmazeproblem = EatAllFoodProblem(((1,1), regularmaze), regularmaze)
+trickyfood = Board(maze=tinyfoodgrid, house=False)
+# for i,j in [(4,1),(5,1),(5,3),(1,6),(1,7),(4,7),(5,7)]:
+for i,j in [(4,1),(5,1),(5,3),(4,7),(5,7)]:
+	trickyfood.foodgrid[i][j] = True
+trickyfoodproblem = EatAllFoodProblem(((3,4),trickyfood),trickyfood)
 
 heuristictestpattern = [
 						["wall", 10],
@@ -88,6 +102,24 @@ heuristictestpattern = [
 heuristictestgrid = maze_generator(heuristictestpattern)
 heuristictest = Board(maze=heuristictestgrid, house=False)
 heuristictestproblem = BoardSearchProblem((1,4), (1,8), heuristictest, ["spot"])
+
+smallmazepattern = [
+					["wall", 13],
+					["wall", 1,5,1,5,1],
+					["wall", 1,1,3,1,1,1,3,1,1],
+					["wall", 1,11,1],
+					["wall", 1,1,9,1,1],
+					["wall", 1,11,1],
+					["wall", 13],
+					]
+smallmazegrid = maze_generator(smallmazepattern)
+smallmaze = Board(maze=smallmazegrid, house=False, filled=True)
+smallmaze.foodgrid[5][1] = False
+smallmazeproblem = EatAllFoodProblem(((5,1), smallmaze), smallmaze)
+
+regularmaze = Board(filled=True, house=True)
+regularmazeproblem = EatAllFoodProblem(((1,1), regularmaze), regularmaze)
+
 
 
 hugemazepattern = [

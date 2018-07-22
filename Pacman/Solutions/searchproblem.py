@@ -1,3 +1,6 @@
+from util import *
+import sys
+import time
 class SearchProblem:
 	'''
 	A wrapper class for defining a generic search problem
@@ -9,6 +12,7 @@ class SearchProblem:
 		self.expanded = 0
 		self.expandedstates = []
 		self.visualizeexpandedstates = False
+		self.starttime = time.time()
 
 	def getStartState(self):
 		raise NotImplementedError()
@@ -63,18 +67,10 @@ class BoardSearchProblem(SearchProblem):
 		super(BoardSearchProblem, self).getSuccessors(state)
 		i,j = state
 		children = []
-		if i > 0:
-			if self.board[i-1][j] in self.passable_blocks:
-				children.append(((i-1,j),"North",1))
-		if i < self.board.height-1:
-			if self.board[i+1][j] in self.passable_blocks:
-				children.append(((i+1,j),"South",1))
-		if j > 0:
-			if self.board[i][j-1] in self.passable_blocks:
-				children.append(((i,j-1),"West",1))
-		if j < self.board.width-1:
-			if self.board[i][j+1] in self.passable_blocks:
-				children.append(((i,j+1),"East",1))
+		for direction in Direction.ALL_DIRECTIONS:
+			newi,newj = direction.apply((i,j))
+			if self.board[newi][newj] in self.passable_blocks:
+				children.append(((newi,newj),direction,1))
 		return children
 
 	def hasWon(self, game):
@@ -112,18 +108,10 @@ class NearestFoodProblem(SearchProblem):
 		super(NearestFoodProblem, self).getSuccessors(state)
 		i,j = state
 		children = []
-		if i > 0:
-			if self.board[i-1][j] in self.passable_blocks:
-				children.append(((i-1,j),"North",1))
-		if i < self.board.height-1:
-			if self.board[i+1][j] in self.passable_blocks:
-				children.append(((i+1,j),"South",1))
-		if j > 0:
-			if self.board[i][j-1] in self.passable_blocks:
-				children.append(((i,j-1),"West",1))
-		if j < self.board.width-1:
-			if self.board[i][j+1] in self.passable_blocks:
-				children.append(((i,j+1),"East",1))
+		for direction in Direction.ALL_DIRECTIONS:
+			newi,newj = direction.apply((i,j))
+			if self.board[newi][newj] in self.passable_blocks:
+				children.append(((newi,newj),direction,1))
 		return children
 
 	def hasWon(self, game):
@@ -161,26 +149,12 @@ class EatAllFoodProblem(SearchProblem):
 		super(EatAllFoodProblem, self).getSuccessors(state)
 		i,j = state[0]
 		children = []
-		if i > 0:
-			if self.board[i-1][j] in self.passable_blocks:
+		for direction in Direction.ALL_DIRECTIONS:
+			newi,newj = direction.apply((i,j))
+			if self.board[newi][newj] in self.passable_blocks:
 				newboard = state[1].copy()
-				newboard[i-1][j] = False
-				children.append((((i-1,j),newboard),"North",1))
-		if i < self.board.height-1:
-			if self.board[i+1][j] in self.passable_blocks:
-				newboard = state[1].copy()
-				newboard[i+1][j] = False
-				children.append((((i+1,j),newboard),"South",1))
-		if j > 0:
-			if self.board[i][j-1] in self.passable_blocks:
-				newboard = state[1].copy()
-				newboard[i][j-1] = False
-				children.append((((i,j-1),newboard),"West",1))
-		if j < self.board.width-1:
-			if self.board[i][j+1] in self.passable_blocks:
-				newboard = state[1].copy()
-				newboard[i][j+1] = False
-				children.append((((i,j+1),newboard),"East",1))
+				newboard.foodgrid[newi][newj] = False
+				children.append((((newi,newj),newboard),direction,1))
 		return children
 
 	def hasWon(self, game):
@@ -218,38 +192,13 @@ class CornersProblem(EatAllFoodProblem):
 		i,j = state[0]
 		children = []
 		oldcorners = state[1]
-		if i > 0:
-			if self.board[i-1][j] in self.passable_blocks:
-				newcorners = oldcorners
-				if (i-1,j) == (1,1):
-					newcorners = (True, oldcorners[1], oldcorners[2], oldcorners[3])
-				elif (i-1,j) == (1,self.board.width-2):
-					newcorners = (oldcorners[0], True, oldcorners[2], oldcorners[3])
-				children.append((((i-1,j),newcorners),"North",1))
-		if i < self.board.height-1:
-			if self.board[i+1][j] in self.passable_blocks:
-				newcorners = oldcorners
-				if (i+1,j) == (self.board.height-2,1):
-					newcorners = (oldcorners[0], oldcorners[1], True, oldcorners[3])
-				elif (i+1,j) == (self.board.height-2,self.board.width-2):
-					newcorners = (oldcorners[0], oldcorners[1], oldcorners[2], True)
-				children.append((((i+1,j),newcorners),"South",1))
-		if j > 0:
-			if self.board[i][j-1] in self.passable_blocks:
-				newcorners = oldcorners
-				if (i,j-1) == (1,1):
-					newcorners = (True, oldcorners[1], oldcorners[2], oldcorners[3])
-				elif (i,j-1) == (self.board.height-2,1):
-					newcorners = (oldcorners[0], oldcorners[1], True, oldcorners[3])
-				children.append((((i,j-1),newcorners),"West",1))
-		if j < self.board.width-1:
-			if self.board[i][j+1] in self.passable_blocks:
-				newcorners = oldcorners
-				if (i,j+1) == (1,self.board.width-2):
-					newcorners = (oldcorners[0], True, oldcorners[2], oldcorners[3])
-				elif (i,j+1) == (self.board.height-2,self.board.width-2):
-					newcorners = (oldcorners[0], oldcorners[1], oldcorners[2], True)
-				children.append((((i,j+1),newcorners),"East",1))
+		for direction in Direction.ALL_DIRECTIONS:
+			newi,newj = direction.apply((i,j))
+			if self.board[newi][newj] in self.passable_blocks:
+				newcorners = list(oldcorners)
+				if (newi,newj) in self.corners:
+					newcorners[self.corners.index((newi,newj))] = True
+				children.append((((newi,newj),tuple(newcorners)),direction,1))
 		return children
 
 	def hasWon(self, game):

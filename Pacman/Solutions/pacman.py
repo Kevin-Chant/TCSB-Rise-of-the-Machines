@@ -30,11 +30,11 @@ class Pacman(Entity):
 
 	def draw(self, screen, x, y):
 		img = self.img
-		if self.direction == "North":
+		if str(self.direction) == "North":
 			img = pygame.transform.rotate(img, 90)
-		elif self.direction == "West":
+		elif str(self.direction) == "West":
 			img = pygame.transform.rotate(img, 180)
-		elif self.direction == "South":
+		elif str(self.direction) == "South":
 			img = pygame.transform.rotate(img, 270)
 		screen.blit(img, (x,y))
 
@@ -62,10 +62,10 @@ class Ghost(Entity):
 		search_problem = BoardSearchProblem(start, target, game.board, self.passable_blocks)
 		path_to_target = breadth_first_search(search_problem)
 		if path_to_target:
-			self.direction = path_to_target[0]
+			self.direction = Direction(path_to_target[0])
 		else:
 			self.direction = None
-		# self.direction = random.choice(["North", "South", "East", "West", None])
+		# self.direction = random.choice(Direction.ALL_DIRECTIONS)
 
 
 board_colors = {"wall": (64, 96, 191),
@@ -127,13 +127,13 @@ class App:
 			if event.key == pygame.K_F4 and (pygame.key.get_pressed()[K_LALT] or pygame.key.get_pressed()[K_RALT]):
 				self._running = False
 			elif event.key == pygame.K_LEFT and not self.player.isAI:
-				self.player.direction = "West"
+				self.player.direction = Direction.west
 			elif event.key == pygame.K_RIGHT and not self.player.isAI:
-				self.player.direction = "East"
+				self.player.direction = Direction.east
 			elif event.key == pygame.K_UP and not self.player.isAI:
-				self.player.direction = "North"
+				self.player.direction = Direction.north
 			elif event.key == pygame.K_DOWN and not self.player.isAI:
-				self.player.direction = "South"
+				self.player.direction = Direction.south
 
 	def on_loop(self):
 		if self.ticklimit:
@@ -144,26 +144,19 @@ class App:
 		self.tickcounter += 1
 		self.tickcounter %= 60
 		if self.tickcounter%tickcount == 0:
+			self.score -= 1
 			for entity in self.entities:
 				if entity.isAI:
 					entity.AI(self)
 				if entity.direction:
-					next_spot = [entity.i, entity.j]
-					if entity.direction == "North":
-						next_spot[0] -= 1
-					elif entity.direction == "South":
-						next_spot[0] += 1
-					elif entity.direction == "East":
-						next_spot[1] += 1
-					elif entity.direction == "West":
-						next_spot[1] -= 1
+					next_spot = entity.direction.apply([entity.i, entity.j])
 					if self.board[next_spot[0]][next_spot[1]] in entity.passable_blocks:
 						self.board[entity.i][entity.j] = entity.current_block
 						entity.i, entity.j = next_spot
 						entity.current_block = self.board[next_spot[0]][next_spot[1]]
 						self.board[next_spot[0]][next_spot[1]] = entity.blocktype
 			if self.board.foodgrid[self.player.i][self.player.j]:
-				self.score += 1
+				self.score += 5
 				self.board.foodgrid[self.player.i][self.player.j] = False
 			for ghost in self.ghosts:
 				if self.player.i == ghost.i and self.player.j == ghost.j:
@@ -186,7 +179,12 @@ class App:
 				if item in board_colors and not self.board.foodgrid[i][j]:
 					rect = pygame.Rect(x, y, self.spot_size, self.spot_size)
 					pygame.draw.rect(self.screen, board_colors[item], rect)
-				elif self.board.foodgrid[i][j]:
+
+	def render_food(self):
+		for i in range(self.board.height):
+			for j in range(self.board.width):
+				x,y = self.convert_ij_to_xy(i,j)
+				if self.board.foodgrid[i][j]:
 					rect = pygame.Rect(x+3*self.spot_size//8, y+3*self.spot_size//8, self.spot_size//4, self.spot_size//4)
 					pygame.draw.rect(self.screen, board_colors["food"], rect)
 
@@ -210,6 +208,7 @@ class App:
 		self.render_board()
 		if self.problem.visualizeexpandedstates:
 			self.render_solution()
+		self.render_food()
 		for entity in self.entities:
 			entity.draw(self.screen, *self.convert_ij_to_xy(entity.i,entity.j))
 		pygame.display.update()

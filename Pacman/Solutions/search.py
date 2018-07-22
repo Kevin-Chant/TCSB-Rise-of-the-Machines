@@ -1,5 +1,6 @@
 from util import *
 from searchproblem import *
+import time
 
 class Node:
 	def __init__(self, state, info):
@@ -15,7 +16,6 @@ class Node:
 			raise KeyError("Invalid key. Key can choose from (0,1), (state,info), or more specific keys for types of nodes")
 
 class BoardSearchNode(Node):
-
 	def __getitem__(self, item):
 		if item == "state":
 			return self.state
@@ -30,14 +30,16 @@ def search_wrapper(problem, search_fx, heuristic=None, debug=True):
 	else:
 		answer = search_fx(problem)
 	if debug:
-		print("Expanded " + str(problem.expanded) + " nodes before terminating.")
+		print("Expanded " + str(problem.expanded) + " nodes in " + str(int(time.time() - problem.starttime)) + " seconds before terminating.")
+		if answer:
+			print("Total path length of solution: " + str(len(answer)))
 		problem.visualizeexpandedstates = True
 	return answer
 
 def general_search(problem, fringe):
 	fringe.push(Node(problem.getStartState(), []))
 	closed = set()
-	expanded = 0
+	i = 0
 	while True:
 		if fringe.isEmpty():
 			return None
@@ -45,10 +47,9 @@ def general_search(problem, fringe):
 		if problem.isGoalState(node["state"]):
 			return node["info"]
 		if node["state"] not in closed:
+			i+=1
 			closed.add(node["state"])
-			expanded += 1
 			children = problem.getSuccessors(node["state"])
-
 			for child,action,cost in children:
 				fringe.push(Node(child,node["info"] + [action]))
 
@@ -88,27 +89,10 @@ def manhattancorner_heuristic(node, problem):
 		return 0
 
 def manhattanfood_heuristic(node, problem):
-	if isinstance(problem, NearestFoodProblem):
-		i,j = node["state"]
-		for r1 in range(problem.board.height):
-			if i-r1 > 0:
-				for r2 in range(problem.board.width):
-					if j-r2 > 0:
-						if problem.board.foodgrid[i-r1][j-r2]:
-							return r1+r2
-					if j+r2 < problem.board.width-1:
-						if problem.board.foodgrid[i-r1][j+r2]:
-							return r1+r2
-
-			if i+r1 < problem.board.height-1:
-				for r2 in range(problem.board.width):
-					if j-r2 > 0:
-						if problem.board.foodgrid[i+r1][j-r2]:
-							return r1+r2
-					if j+r2 < problem.board.width-1:
-						if problem.board.foodgrid[i+r1][j+r2]:
-							return r1+r2
-
+	if isinstance(problem, EatAllFoodProblem):
+		problem = NearestFoodProblem(problem.getPos(node["state"]),problem.board)
+		food_dists=[manhattan_distance(problem.getStartPos(), (i,j)) for i in range(problem.board.height) for j in range(problem.board.width) if problem.board.foodgrid[i][j]]
+		return min(food_dists)
 	return 0
 
 def bfs_heuristic(node, problem):
@@ -120,8 +104,8 @@ def bfs_heuristic(node, problem):
 	return 0
 
 def bfsfood_heuristic(node, problem):
-	if isinstance(problem, NearestFoodProblem):
-		problem = NearestFoodProblem(node["state"], problem.board)
+	if isinstance(problem, EatAllFoodProblem):
+		problem = NearestFoodProblem(problem.getPos(node["state"]), problem.board)
 		return len(breadth_first_search(problem))
 	else:
 		return 0
@@ -148,3 +132,26 @@ def corners_heuristic(node, problem):
         est += mindist
         position = cornersToVisit.pop(mindex)
     return est
+
+def food_heuristic(node, problem):
+	state = node["state"]
+	if problem.isGoalState(state):
+		return 0
+
+	estimate = 0
+
+	nfp = NearestFoodProblem(problem.getPos(node["state"]), problem.board)
+	nfp_path = breadth_first_search(nfp)
+	nearestfooddist = len(nfp_path)
+	estimate += nearestfooddist
+
+	nfi,nfj = problem.getPos(state)
+	for i in range(len(nfp_path)):
+		nfi,nfj = nfp_path[i].apply((nfi,nfj))
+	secondboard = problem.board.copy()
+	secondboard.foodgrid[nfi][nfj] = False
+	numfood = sum([sum(row) for row in secondboard.foodgrid])
+	if numfood > 0:
+		nfp2 = NearestFoodProblem((nfi,nfj), secondboard)
+		estimate += len(breadth_first_search(nfp2)) - 1
+	return estimate + numfood

@@ -38,7 +38,7 @@ class RandomPacman(AutoPacman):
 		super(RandomPacman, self).__init__(i,j,game)
 
 	def AI(self, game):
-		self.direction = random.choice(["North", "South", "East", "West", None])
+		self.direction = random.choice(Direction.ALL_DIRECTIONS)
 
 class TinyMazePacman(AutoPacman):
 	'''
@@ -46,7 +46,7 @@ class TinyMazePacman(AutoPacman):
 	'''
 	def __init__(self, i, j, game):
 		super(TinyMazePacman, self).__init__(i,j,game)
-		self.directions = ["South", "South", "South", "South", "West", "West", "South", "West", "West", "South"]
+		self.directions = [Direction(item) for item in ["South", "South", "South", "South", "West", "West", "South", "West", "West", "South"]]
 	
 
 class BFSPacman(AutoPacman):
@@ -55,14 +55,11 @@ class BFSPacman(AutoPacman):
 	'''
 	def __init__(self, i, j, game):
 		super(BFSPacman, self).__init__(i,j,game)
-		if not isinstance(game.problem, BoardSearchProblem):
-			self.directions = []
+		path_to_target = search_wrapper(game.problem,breadth_first_search)
+		if path_to_target:
+			self.directions = path_to_target
 		else:
-			path_to_target = search_wrapper(game.problem,breadth_first_search)
-			if path_to_target:
-				self.directions = path_to_target
-			else:
-				self.directions = []
+			self.directions = []
 	
 
 class DFSPacman(AutoPacman):
@@ -71,14 +68,11 @@ class DFSPacman(AutoPacman):
 	'''
 	def __init__(self, i, j, game):
 		super(DFSPacman, self).__init__(i,j,game)
-		if not isinstance(game.problem, BoardSearchProblem):
-			self.directions = []
+		path_to_target = search_wrapper(game.problem,depth_first_search)
+		if path_to_target:
+			self.directions = path_to_target
 		else:
-			path_to_target = search_wrapper(game.problem,depth_first_search)
-			if path_to_target:
-				self.directions = path_to_target
-			else:
-				self.directions = []
+			self.directions = []
 
 class UCSPacman(AutoPacman):
 	'''
@@ -86,14 +80,11 @@ class UCSPacman(AutoPacman):
 	'''
 	def __init__(self, i, j, game):
 		super(UCSPacman, self).__init__(i,j,game)
-		if not isinstance(game.problem, BoardSearchProblem):
-			self.directions = []
+		path_to_target = search_wrapper(game.problem, ucs)
+		if path_to_target:
+			self.directions = path_to_target
 		else:
-			path_to_target = search_wrapper(game.problem, ucs)
-			if path_to_target:
-				self.directions = path_to_target
-			else:
-				self.directions = []
+			self.directions = []
 	
 
 class AStarPacman(AutoPacman):
@@ -103,31 +94,35 @@ class AStarPacman(AutoPacman):
 	def __init__(self, i, j, game, heuristic=null_heuristic):
 		super(AStarPacman, self).__init__(i,j,game)
 		startnode = Node((1,1),[])
-		if not isinstance(game.problem, BoardSearchProblem) and not isinstance(game.problem, EatAllFoodProblem):
-			self.directions = []
+		path_to_target = search_wrapper(game.problem, Astar, heuristic)
+		if path_to_target:
+			self.directions = path_to_target
 		else:
-			path_to_target = search_wrapper(game.problem, Astar, heuristic)
-			if path_to_target:
-				self.directions = path_to_target
-			else:
-				self.directions = []
+			self.directions = []
 
-class GreedyFoodPacman(AutoPacman):
+class GreedyPacman(AutoPacman):
 	'''
-	Greedily searches for the nearest food
+	Greedily follows the lowest heuristic
 	'''
 	def __init__(self, i, j, game, heuristic=null_heuristic):
-		super(GreedyFoodPacman, self).__init__(i,j,game)
-		self.directionIndex = 0
-		if not isinstance(game.problem, EatAllFoodProblem):
-			self.directions = []
+		super(GreedyPacman, self).__init__(i,j,game)
+		path_to_target = search_wrapper(game.problem, greedySearch, heuristic)
+		if path_to_target:
+			self.directions = path_to_target
 		else:
-			path_to_target = search_wrapper(game.problem, greedySearch, heuristic)
-			if path_to_target:
-				self.directions = path_to_target
-			else:
-				self.directions = []
+			self.directions = []
 
+class ClosestDotPacman(AutoPacman):
+	'''
+	Always moves to the closest dot
+	'''
+	def __init__(self, i, j, game, heuristic=null_heuristic):
+		super(ClosestDotPacman, self).__init__(i,j,game)
+		
 
-
+	def AI(self, game):
+		problem = NearestFoodProblem((self.i,self.j), game.board)
+		path_to_target = search_wrapper(problem, breadth_first_search, debug=False)
+		if path_to_target:
+			self.direction = path_to_target[0]
 

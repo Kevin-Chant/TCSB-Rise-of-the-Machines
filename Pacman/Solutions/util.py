@@ -72,6 +72,10 @@ class Board:
 		if house:
 			self.create_house()
 
+	def __hash__(self):
+		foodtuple = (tuple(row) for row in self.foodgrid)
+		gridtuple = (tuple(row) for row in self.grid)
+		return hash((foodtuple,gridtuple))
 
 	def __getitem__(self, i):
 		return self.grid[i]
@@ -122,6 +126,33 @@ class Board:
 		newboard = Board(maze=self.grid, house=self.hasGhosts)
 		newboard.foodgrid = [row.copy() for row in self.foodgrid]
 		return newboard
+
+class Direction:
+	def __init__(self, name):
+		if name not in Direction.DIRECTION_NAMES:
+			raise ValueError("Can only instantiate a direction for N,S,E,W")
+		self.name = name
+
+	def __repr__(self):
+		return self.name
+
+	def apply(self, pos):
+		if self.name == "North":
+			return (pos[0]-1, pos[1])
+		elif self.name == "South":
+			return (pos[0]+1, pos[1])
+		elif self.name == "East":
+			return (pos[0], pos[1]+1)
+		else:
+			return (pos[0], pos[1]-1)
+
+	DIRECTION_NAMES = ["North", "South", "East", "West"]
+
+Direction.north = Direction("North")
+Direction.south = Direction("South")
+Direction.east = Direction("East")
+Direction.west = Direction("West")
+Direction.ALL_DIRECTIONS = [Direction.north, Direction.south, Direction.east, Direction.west]
 
 def manhattan_distance(xy1, xy2):
     return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])
