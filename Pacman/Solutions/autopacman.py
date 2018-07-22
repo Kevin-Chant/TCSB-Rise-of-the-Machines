@@ -58,12 +58,27 @@ class BFSPacman(AutoPacman):
 		if not isinstance(game.problem, BoardSearchProblem):
 			self.directions = []
 		else:
-			path_to_target = breadth_first_search(game.problem)
+			path_to_target = search_wrapper(game.problem,breadth_first_search)
 			if path_to_target:
 				self.directions = path_to_target
 			else:
 				self.directions = []
 	
+
+class DFSPacman(AutoPacman):
+	'''
+	Searches for the optimal path to the target (only works for mazes where the problem is a BoardSearchProblem)
+	'''
+	def __init__(self, i, j, game):
+		super(DFSPacman, self).__init__(i,j,game)
+		if not isinstance(game.problem, BoardSearchProblem):
+			self.directions = []
+		else:
+			path_to_target = search_wrapper(game.problem,depth_first_search)
+			if path_to_target:
+				self.directions = path_to_target
+			else:
+				self.directions = []
 
 class UCSPacman(AutoPacman):
 	'''
@@ -74,7 +89,7 @@ class UCSPacman(AutoPacman):
 		if not isinstance(game.problem, BoardSearchProblem):
 			self.directions = []
 		else:
-			path_to_target = ucs(game.problem)
+			path_to_target = search_wrapper(game.problem, ucs)
 			if path_to_target:
 				self.directions = path_to_target
 			else:
@@ -91,7 +106,7 @@ class AStarPacman(AutoPacman):
 		if not isinstance(game.problem, BoardSearchProblem) and not isinstance(game.problem, EatAllFoodProblem):
 			self.directions = []
 		else:
-			path_to_target = Astar(game.problem, heuristic)
+			path_to_target = search_wrapper(game.problem, Astar, heuristic)
 			if path_to_target:
 				self.directions = path_to_target
 			else:
@@ -107,7 +122,7 @@ class GreedyFoodPacman(AutoPacman):
 		if not isinstance(game.problem, EatAllFoodProblem):
 			self.directions = []
 		else:
-			path_to_target = greedySearch(game.problem, heuristic)
+			path_to_target = search_wrapper(game.problem, greedySearch, heuristic)
 			if path_to_target:
 				self.directions = path_to_target
 			else:

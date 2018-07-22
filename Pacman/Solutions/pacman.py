@@ -77,7 +77,7 @@ board_colors = {"wall": (64, 96, 191),
 bg_color = (0,0,0)
 
 class App:
-	def __init__(self, food=True, problem=None, agent=None, heuristic=None):
+	def __init__(self, food=True, problem=None, agent=None, heuristic=None, nographics=False):
 		self._running = True
 		self.screen = None
 		if not problem:
@@ -103,7 +103,11 @@ class App:
 		self.entities = [self.player]
 		self.ghosts = []
 
-		self.clock = pygame.time.Clock()
+		if nographics:
+			self.ticklimit = False
+		else:
+			self.ticklimit = True
+			self.clock = pygame.time.Clock()
 
 		if self.board.hasGhosts:
 			for j,ghost in enumerate(["inky", "blinky", "pinky", "clyde"]):
@@ -132,10 +136,14 @@ class App:
 				self.player.direction = "South"
 
 	def on_loop(self):
-		self.clock.tick(60)
+		if self.ticklimit:
+			self.clock.tick(60)
+			tickcount = 10
+		else:
+			tickcount = 1
 		self.tickcounter += 1
 		self.tickcounter %= 60
-		if self.tickcounter%10 == 0:
+		if self.tickcounter%tickcount == 0:
 			for entity in self.entities:
 				if entity.isAI:
 					entity.AI(self)
@@ -165,6 +173,7 @@ class App:
 					exit(0)
 			if self.problem.hasWon(self):
 				print("You win!")
+				self.score += 100
 				print("Final score: " + str(self.score))
 				exit(0)
 
@@ -185,9 +194,22 @@ class App:
 		x,y = self.board_offset
 		return (x+j*self.spot_size, y+i*self.spot_size)
 
+	def render_solution(self):
+		numstates = self.problem.expanded
+		startcolor = (100,20,20)
+		endcolor = (20,20,20)
+		for i in range(numstates):
+			pos = self.problem.getPos(self.problem.expandedstates[i])
+			color = [startcolor[j] - int(i/numstates * (startcolor[j] - endcolor[j])) for j in range(3)]
+			x,y = self.convert_ij_to_xy(*pos)
+			pygame.draw.rect(self.screen, color, (x,y,self.spot_size,self.spot_size))
+
+
 	def on_render(self):
 		self.screen.fill(bg_color)
 		self.render_board()
+		if self.problem.visualizeexpandedstates:
+			self.render_solution()
 		for entity in self.entities:
 			entity.draw(self.screen, *self.convert_ij_to_xy(entity.i,entity.j))
 		pygame.display.update()
@@ -207,7 +229,7 @@ class App:
 		self.on_cleanup()
  
 def main(**kwargs):
-	theApp = App(problem=kwargs.get("problem",None),agent=kwargs.get("agent",None),heuristic=kwargs.get("heuristic",None))
+	theApp = App(problem=kwargs.get("problem",None),agent=kwargs.get("agent",None),heuristic=kwargs.get("heuristic",None), nographics = kwargs.get("nographics", False))
 	theApp.on_execute()
 
 if __name__ == "__main__" :
@@ -215,6 +237,7 @@ if __name__ == "__main__" :
 	# -maze=mazename
 	# -agent=agentname
 	# -heuristic=heuristicname
+	# -nographics
 	kwargs = {}
 	if len(sys.argv) > 1:
 		for arg in sys.argv[1:]:
@@ -224,4 +247,6 @@ if __name__ == "__main__" :
 				kwargs["agent"] = eval(arg.split("=")[1])
 			elif "-heuristic=" in arg:
 				kwargs["heuristic"] = eval(arg.split("=")[1] + "_heuristic")
+			elif arg == "-nographics":
+				kwargs["nographics"] = True
 	main(**kwargs)

@@ -24,6 +24,16 @@ class BoardSearchNode(Node):
 		else:
 			return super(BoardSearchNode,Node).__getitem__(item)
 
+def search_wrapper(problem, search_fx, heuristic=None, debug=True):
+	if heuristic:
+		answer = search_fx(problem, heuristic)
+	else:
+		answer = search_fx(problem)
+	if debug:
+		print("Expanded " + str(problem.expanded) + " nodes before terminating.")
+		problem.visualizeexpandedstates = True
+	return answer
+
 def general_search(problem, fringe):
 	fringe.push(Node(problem.getStartState(), []))
 	closed = set()
@@ -38,6 +48,7 @@ def general_search(problem, fringe):
 			closed.add(node["state"])
 			expanded += 1
 			children = problem.getSuccessors(node["state"])
+
 			for child,action,cost in children:
 				fringe.push(Node(child,node["info"] + [action]))
 
@@ -64,29 +75,19 @@ def greedySearch(problem, heuristic):
 def null_heuristic(node, problem):
 	return 0
 
-def euclidean_heuristic(node, problem):
+def manhattan_heuristic(node, problem):
 	if isinstance(problem, BoardSearchProblem):
-		return abs(node["state"][0]-problem.goal[0]) + abs(node["state"][1]-problem.goal[1])
+		return manhattan_distance(node["state"], problem.goal[0])
 	else:
 		return 0
 
-def euclideancorner_heuristic(node, problem):
+def manhattancorner_heuristic(node, problem):
 	if isinstance(problem, CornersProblem):
-		i,j = node["state"][0]
-		dist = 0
-		if i < problem.board.height//2:
-			dist += i-1
-		else:
-			dist += problem.board.height-2-i
-		if j < problem.board.width//2:
-			dist += j-1
-		else:
-			dist += problem.board.width-2-j
-		return dist
+		return min([manhattan_distance(problem.getPos(node["state"]), problem.corners[i]) for i in range(4)])
 	else:
 		return 0
 
-def euclideanfood_heuristic(node, problem):
+def manhattanfood_heuristic(node, problem):
 	if isinstance(problem, NearestFoodProblem):
 		i,j = node["state"]
 		for r1 in range(problem.board.height):
@@ -110,9 +111,40 @@ def euclideanfood_heuristic(node, problem):
 
 	return 0
 
+def bfs_heuristic(node, problem):
+	if isinstance(problem, BoardSearchProblem):
+		problem = BoardSearchProblem(node["state"], problem.goal, problem.board, problem.passable_blocks)
+		answer = breadth_first_search(problem)
+		if answer:
+			return len(answer)
+	return 0
+
 def bfsfood_heuristic(node, problem):
 	if isinstance(problem, NearestFoodProblem):
 		problem = NearestFoodProblem(node["state"], problem.board)
 		return len(breadth_first_search(problem))
 	else:
 		return 0
+
+def corners_heuristic(node, problem):
+    corners = problem.corners # These are the corner coordinates
+    state = node["state"]
+    if problem.isGoalState(state):
+        return 0
+    visited = state[1]
+    cornersToVisit = []
+
+    for i in range(0, 4):
+        if not visited[i]:
+            cornersToVisit.append(corners[i])
+    est = 0
+    position = problem.getPos(state)
+    while (len(cornersToVisit) > 0):
+        cornerDistances = []
+        for corner in cornersToVisit:
+            cornerDistances.append(manhattan_distance(position, corner))
+        mindist = min(cornerDistances)
+        mindex = cornerDistances.index(mindist)
+        est += mindist
+        position = cornersToVisit.pop(mindex)
+    return est

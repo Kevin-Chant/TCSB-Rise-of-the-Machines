@@ -6,12 +6,17 @@ class SearchProblem:
 
 	# kwargs indicates that each type of problem will need to be initialized with different keyword arguments
 	def __init__(self, **kwargs):
-		raise NotImplementedError()
+		self.expanded = 0
+		self.expandedstates = []
+		self.visualizeexpandedstates = False
 
 	def getStartState(self):
 		raise NotImplementedError()
 	
 	def getStartPos(self):
+		return self.getPos(self.getStartState())
+
+	def getPos(self, state):
 		raise NotImplementedError()
 
 	def getBoard(self):
@@ -21,7 +26,8 @@ class SearchProblem:
 		raise NotImplementedError()
 
 	def getSuccessors(self, state):
-		raise NotImplementedError()
+		self.expanded += 1
+		self.expandedstates.append(state)
 
 	def hasWon(self, game):
 		raise NotImplementedError()
@@ -35,6 +41,7 @@ class BoardSearchProblem(SearchProblem):
 	'''
 
 	def __init__(self, start, goal, board, passable_blocks):
+		super(BoardSearchProblem, self).__init__()
 		self.start = start
 		self.goal = goal
 		self.board = board
@@ -42,9 +49,9 @@ class BoardSearchProblem(SearchProblem):
 
 	def getStartState(self):
 		return self.start
-	
-	def getStartPos(self):
-		return self.start
+
+	def getPos(self, state):
+		return state
 	
 	def getBoard(self):
 		return self.board
@@ -53,6 +60,7 @@ class BoardSearchProblem(SearchProblem):
 		return state == self.goal
 
 	def getSuccessors(self, state):
+		super(BoardSearchProblem, self).getSuccessors(state)
 		i,j = state
 		children = []
 		if i > 0:
@@ -82,6 +90,7 @@ class NearestFoodProblem(SearchProblem):
 	'''
 
 	def __init__(self, start, board):
+		super(NearestFoodProblem, self).__init__()
 		self.start = start
 		self.board = board
 		self.passable_blocks = ["spot"]
@@ -89,9 +98,9 @@ class NearestFoodProblem(SearchProblem):
 	def getStartState(self):
 		return self.start
 	
-	def getStartPos(self):
-		return self.start
-	
+	def getPos(self, state):
+		return state
+
 	def getBoard(self):
 		return self.board
 
@@ -100,6 +109,7 @@ class NearestFoodProblem(SearchProblem):
 		return self.board.foodgrid[i][j]
 
 	def getSuccessors(self, state):
+		super(NearestFoodProblem, self).getSuccessors(state)
 		i,j = state
 		children = []
 		if i > 0:
@@ -130,6 +140,7 @@ class EatAllFoodProblem(SearchProblem):
 	'''
 
 	def __init__(self, start, board):
+		super(EatAllFoodProblem, self).__init__()
 		self.start = start
 		self.board = board
 		self.passable_blocks = ["spot"]
@@ -137,8 +148,8 @@ class EatAllFoodProblem(SearchProblem):
 	def getStartState(self):
 		return self.start
 	
-	def getStartPos(self):
-		return self.start[0]
+	def getPos(self, state):
+		return state[0]
 
 	def getBoard(self):
 		return self.board
@@ -147,6 +158,7 @@ class EatAllFoodProblem(SearchProblem):
 		return state[1].isEmpty()
 
 	def getSuccessors(self, state):
+		super(EatAllFoodProblem, self).getSuccessors(state)
 		i,j = state[0]
 		children = []
 		if i > 0:
@@ -183,15 +195,17 @@ class CornersProblem(EatAllFoodProblem):
 	'''
 
 	def __init__(self, start, board):
+		super(EatAllFoodProblem, self).__init__()
 		self.start = start
 		self.board = board
 		self.passable_blocks = ["spot"]
+		self.corners = [(1,1), (1,board.width-2), (board.height-2,1), (board.height-2,board.width-2)]
 
 	def getStartState(self):
 		return self.start
 	
-	def getStartPos(self):
-		return self.start[0]
+	def getPos(self, state):
+		return state[0]
 
 	def getBoard(self):
 		return self.board
@@ -200,6 +214,7 @@ class CornersProblem(EatAllFoodProblem):
 		return sum(state[1]) == 4
 
 	def getSuccessors(self, state):
+		super(EatAllFoodProblem, self).getSuccessors(state)
 		i,j = state[0]
 		children = []
 		oldcorners = state[1]
@@ -235,59 +250,6 @@ class CornersProblem(EatAllFoodProblem):
 				elif (i,j+1) == (self.board.height-2,self.board.width-2):
 					newcorners = (oldcorners[0], oldcorners[1], oldcorners[2], True)
 				children.append((((i,j+1),newcorners),"East",1))
-		return children
-
-	def hasWon(self, game):
-		return game.board.isEmpty()
-
-class AdversarialEatAllFoodProblem(EatAllFoodProblem):
-	'''
-	A modified form of the EatAllFoodProblem where Pacman must deal with ghosts
-	State = (i,j) coordinate pair, current board, and list of ghost positions
-	Goal = N/A
-	Child = (state, action, cost) triple
-	'''
-
-	def __init__(self, start, board, ghost_starts):
-		self.start = start
-		self.board = board
-		self.passable_blocks = ["spot", "ghost"]
-
-	def getStartState(self):
-		return self.start
-	
-	def getStartPos(self):
-		return self.start[0]
-
-	def getBoard(self):
-		return self.board
-
-	def isGoalState(self, state):
-		return state[1].isEmpty()
-
-	def getSuccessors(self, state):
-		i,j = state[0]
-		children = []
-		if i > 0:
-			if self.board[i-1][j] in self.passable_blocks:
-				newboard = state[1].copy()
-				newboard[i-1][j] = False
-				children.append((((i-1,j),newboard, state[2]),"North",1))
-		if i < self.board.height-1:
-			if self.board[i+1][j] in self.passable_blocks:
-				newboard = state[1].copy()
-				newboard[i+1][j] = False
-				children.append((((i+1,j),newboard, state[2]),"South",1))
-		if j > 0:
-			if self.board[i][j-1] in self.passable_blocks:
-				newboard = state[1].copy()
-				newboard[i][j-1] = False
-				children.append((((i,j-1),newboard, state[2]),"West",1))
-		if j < self.board.width-1:
-			if self.board[i][j+1] in self.passable_blocks:
-				newboard = state[1].copy()
-				newboard[i][j+1] = False
-				children.append((((i,j+1),newboard, state[2]),"East",1))
 		return children
 
 	def hasWon(self, game):
