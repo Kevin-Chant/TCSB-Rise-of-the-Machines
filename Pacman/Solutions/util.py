@@ -1,4 +1,9 @@
 import heapq
+
+"""
+Stores items in a stack where the last item added is the first item removed (LIFO)
+Remember the pancake analogy - the most recent pancake put on top is the first one eaten
+"""
 class Stack:
 	def __init__(self):
 		self.list = []
@@ -12,6 +17,10 @@ class Stack:
 	def isEmpty(self):
 		return len(self.list) == 0
 
+"""
+Stores items in a queue where the first item added is the first item removed (FIFO)
+This structure is like lines at the store - the first people to line up are the first people to get through to the end.
+"""
 class Queue:
 	def __init__(self):
 		self.list = []
@@ -25,6 +34,11 @@ class Queue:
 	def isEmpty(self):
 		return len(self.list) == 0
 
+"""
+A modified Queue (FIFO) where items with higher priority can be pushed along the queue.
+This is like letting people cut in line if they're important.
+In this case lower number on the evaluation function (lower cost) = higher priority
+"""
 class PriorityQueue:
 	def __init__(self, eval_fx):
 		self.fx = eval_fx
@@ -43,6 +57,11 @@ class PriorityQueue:
 	def isEmpty(self):
 		return len(self.list) == 0
 
+"""
+The Board for the pacman game, has a .grid for the spots and walls and a .foodgrid for the food
+Utility method .isEmpty can be used to check if all food has been eaten
+It is a hashable data type so it can be included in a Set
+"""
 class Board:
 	def __init__(self, width=20, height=15, filled=False, house=False, maze=None):
 		if not maze:
@@ -127,6 +146,11 @@ class Board:
 		newboard.foodgrid = [row.copy() for row in self.foodgrid]
 		return newboard
 
+"""
+Direction class to make calculation of movement easier.
+Use Direction.North, Direction.South, etc to refer to the directions
+Direction objects have a .apply method. Direction.North.apply((2,2)) -> (1,2)
+"""
 class Direction:
 	def __init__(self, name):
 		if name not in Direction.DIRECTION_NAMES:
@@ -154,5 +178,9 @@ Direction.east = Direction("East")
 Direction.west = Direction("West")
 Direction.ALL_DIRECTIONS = [Direction.north, Direction.south, Direction.east, Direction.west]
 
+
+"""
+Calculate the manhattan distance between two points. m_d((1,1),(2,2)) -> 2-1 + 2-1 = 2
+"""
 def manhattan_distance(xy1, xy2):
     return abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])

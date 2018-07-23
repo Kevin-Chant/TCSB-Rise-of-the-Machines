@@ -36,15 +36,17 @@ tinymazegrid = maze_generator(tinymazepattern)
 tinymaze = Board(maze=tinymazegrid, house=False)
 tinymazeproblem = BoardSearchProblem((1,5), (7,1), tinymaze, ["spot"])
 
-tinycornersgrid = 	[
-					["wall", "wall", "wall", "wall", "wall", "wall", "wall"],
-					["wall", "spot", "spot", "spot", "spot", "spot", "wall"],
-					["wall", "spot", "wall", "spot", "wall", "spot", "wall"],
-					["wall", "spot", "spot", "spot", "spot", "spot", "wall"],
-					["wall", "spot", "wall", "spot", "wall", "spot", "wall"],
-					["wall", "spot", "spot", "spot", "spot", "spot", "wall"],
-					["wall", "wall", "wall", "wall", "wall", "wall", "wall"],
+
+tinycornerspattern = [
+					["wall",7],
+					["wall",1,5,1],
+					["wall",1,1,1,1,1,1,1],
+					["wall",1,5,1],
+					["wall",1,1,1,1,1,1,1],
+					["wall",1,5,1],
+					["wall",7],
 					]
+tinycornersgrid = maze_generator(tinycornerspattern)
 tinycorners = Board(maze=tinycornersgrid, house=False)
 tinycorners.fillcorners()
 tinycornerstart = ((3,3),(False, False, False, False))

@@ -23,11 +23,11 @@ class AutoPacman(Pacman):
 
 class GoWestPacman(AutoPacman):
 	'''
-	The simplest AI which simply goes West
+	The simplest AI which always goes West
 	'''
 	def __init__(self,i,j,game):
 		super(GoWestPacman, self).__init__(i,j,game)
-		self.directions = ["West"] * 100
+		self.directions = ["West"]
 
 
 class RandomPacman(AutoPacman):
@@ -51,7 +51,7 @@ class TinyMazePacman(AutoPacman):
 
 class BFSPacman(AutoPacman):
 	'''
-	Searches for the optimal path to the target (only works for mazes where the problem is a BoardSearchProblem)
+	Searches for the optimal path to the target
 	'''
 	def __init__(self, i, j, game):
 		super(BFSPacman, self).__init__(i,j,game)
@@ -64,7 +64,7 @@ class BFSPacman(AutoPacman):
 
 class DFSPacman(AutoPacman):
 	'''
-	Searches for the optimal path to the target (only works for mazes where the problem is a BoardSearchProblem)
+	Searches for the deepest path to the target (usually quick but suboptimal)
 	'''
 	def __init__(self, i, j, game):
 		super(DFSPacman, self).__init__(i,j,game)
@@ -76,7 +76,7 @@ class DFSPacman(AutoPacman):
 
 class UCSPacman(AutoPacman):
 	'''
-	Searches for the optimal path to the target (only works for mazes where the problem is a BoardSearchProblem)
+	Searches for the optimal path to the target
 	'''
 	def __init__(self, i, j, game):
 		super(UCSPacman, self).__init__(i,j,game)
@@ -89,7 +89,7 @@ class UCSPacman(AutoPacman):
 
 class AStarPacman(AutoPacman):
 	'''
-	Searches for the optimal path to the target (only works for mazes where the problem is a BoardSearchProblem)
+	Searches for the optimal path to the target (quicker than BFS or UCS with a good heuristic)
 	'''
 	def __init__(self, i, j, game, heuristic=null_heuristic):
 		super(AStarPacman, self).__init__(i,j,game)
