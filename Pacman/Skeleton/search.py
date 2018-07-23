@@ -145,7 +145,7 @@ def bfsfood_heuristic(node, problem):
 Estimates the distance to solve the CornersProblem
 """
 def corners_heuristic(node, problem):
-    "*** YOUR CODE HERE ***"
+	"*** YOUR CODE HERE ***"
 	raise NotImplementedError()
 
 """

@@ -130,9 +130,9 @@ regularmazepattern = [
                       ["wall", 2,3,1,3,2,3,1,3,2],
                       ["wall", 4,1,3,1,2,1,3,1,4],
                       ["wall", 4,1,1,8,1,1,4],
-                      ["wall", 4,1,1,1,2,2,2,1,1,1,4],
+                      #["wall", 4,1,1,1,2,2,2,1,1,1,4],
                       ["wall", 4,3,1,4,1,3,4],
-                      ["wall", 4,1,1,1,6,1,1,1,4],
+                      #["wall", 4,1,1,1,6,1,1,1,4],
                       ["wall", 4,1,1,8,1,1,4],
                       ["wall", 4,1,1,1,6,1,1,1,4],
                       ["wall", 1,8,2,8,1],
@@ -147,7 +147,7 @@ regularmazepattern = [
 
 regularmazegrid = maze_generator(regularmazepattern)
 regularmaze = Board(maze=regularmazegrid, filled=True, house=True)
-regularmazeproblem = EatAllFoodProblem(((15,9), regularmaze), regularmaze)
+regularmazeproblem = EatAllFoodProblem(((13,9), regularmaze), regularmaze)
 
 
 
