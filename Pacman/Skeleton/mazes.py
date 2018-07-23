@@ -147,7 +147,7 @@ regularmazepattern = [
 
 regularmazegrid = maze_generator(regularmazepattern)
 regularmaze = Board(maze=regularmazegrid, filled=True, house=True)
-regularmazeproblem = EatAllFoodProblem(((15,9), regularmaze), regularmaze)
+regularmazeproblem = EatAllFoodProblem(((13,9), regularmaze), regularmaze)
 
 
 
