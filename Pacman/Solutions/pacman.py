@@ -62,7 +62,7 @@ class Ghost(Entity):
 		search_problem = BoardSearchProblem(start, target, game.board, self.passable_blocks)
 		path_to_target = breadth_first_search(search_problem)
 		if path_to_target:
-			self.direction = Direction(path_to_target[0])
+			self.direction = path_to_target[0]
 		else:
 			self.direction = None
 		# self.direction = random.choice(Direction.ALL_DIRECTIONS)

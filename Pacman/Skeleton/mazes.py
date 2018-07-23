@@ -119,8 +119,35 @@ smallmaze = Board(maze=smallmazegrid, house=False, filled=True)
 smallmaze.foodgrid[5][1] = False
 smallmazeproblem = EatAllFoodProblem(((5,1), smallmaze), smallmaze)
 
-regularmaze = Board(filled=True, house=True)
-regularmazeproblem = EatAllFoodProblem(((1,1), regularmaze), regularmaze)
+
+
+regularmazepattern = [
+                      ["wall", 20],
+                      ["wall", 2, 7, 2, 7, 2],
+                      ["wall", 2,1,1,1,3,1,2,1,3,1,1,1,2],
+                      ["wall", 2, 16, 2],
+                      ["wall", 2,1,1,1,1,1,6,1,1,1,1,1,2],
+                      ["wall", 2,3,1,3,2,3,1,3,2],
+                      ["wall", 4,1,3,1,2,1,3,1,4],
+                      ["wall", 4,1,1,8,1,1,4],
+                      ["wall", 4,1,1,1,2,2,2,1,1,1,4],
+                      ["wall", 4,3,1,4,1,3,4],
+                      ["wall", 4,1,1,1,6,1,1,1,4],
+                      ["wall", 4,1,1,8,1,1,4],
+                      ["wall", 4,1,1,1,6,1,1,1,4],
+                      ["wall", 1,8,2,8,1],
+                      ["wall", 1,1,2,1,3,1,2,1,3,1,2,1,1],
+                      ["wall", 1,2,1,12,1,2,1],
+                      ["wall", 2,1,1,1,1,1,6,1,1,1,1,1,2],
+                      ["wall", 1,4,1,3,2,3,1,4,1],
+                      ["wall", 1,1,6,1,2,1,6,1,1],
+                      ["wall", 1,18,1],
+                      ["wall", 20]
+                     ]
+
+regularmazegrid = maze_generator(regularmazepattern)
+regularmaze = Board(maze=regularmazegrid, filled=True, house=True)
+regularmazeproblem = EatAllFoodProblem(((15,9), regularmaze), regularmaze)
 
 
 
