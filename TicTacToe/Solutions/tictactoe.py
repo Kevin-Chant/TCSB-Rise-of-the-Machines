@@ -138,14 +138,21 @@ class App:
 				if x > 225 and x < 375:
 					if y > 100 and y < 175:
 						self.menu = False
-					if y > 400 and y < 475:
+						if self.player == "o":
+							self.grid = minimax(self.grid, other(self.player), self.difficulty)
+					if y > 450 and y < 525:
 						self._running = False
 				if x > 125 and x < 275:
 					if y > 250 and y < 325:
 						self.difficulty = 1
+					if y > 350 and y < 425:
+						self.player = "x"
 				if x > 325 and x < 475:
 					if y > 250 and y < 325:
 						self.difficulty = 4
+					if y > 250 and y < 425:
+						self.player = "o"
+
 			# Outside of the menu, determine where the player clicked and try to move there
 			else:
 				if not self.gameover:
@@ -227,20 +234,28 @@ class App:
 			self.screen.blit(titlesurface, (180, 10))
 			# Play button
 			pygame.draw.rect(self.screen, (200,200,200), (225, 100, 150, 75))
-			playsurface = menufont.render("Play", False, (0,0,0))
-			self.screen.blit(playsurface, (280,120))
+			textsurface = menufont.render("Play", False, (0,0,0))
+			self.screen.blit(textsurface, (280,120))
 			# Regular difficulty
 			pygame.draw.rect(self.screen, (100,200,100), (125, 250, 150, 75))
-			playsurface = menufont.render("Regular", False, (0,0,0))
-			self.screen.blit(playsurface, (150,270))
+			textsurface = menufont.render("Regular", False, (0,0,0))
+			self.screen.blit(textsurface, (150,270))
 			# Impossible difficulty
 			pygame.draw.rect(self.screen, (200,100,100), (325, 250, 150, 75))
-			playsurface = menufont.render("Impossible", False, (0,0,0))
-			self.screen.blit(playsurface, (350,270))
+			textsurface = menufont.render("Impossible", False, (0,0,0))
+			self.screen.blit(textsurface, (350,270))
+			# Play as X
+			pygame.draw.rect(self.screen, (200,200,200), (125, 350, 150, 75))
+			textsurface = menufont.render("Play as X", False, (0,0,0))
+			self.screen.blit(textsurface, (150,370))
+			# Play as O
+			pygame.draw.rect(self.screen, (200,200,200), (325, 350, 150, 75))
+			textsurface = menufont.render("Play as O", False, (0,0,0))
+			self.screen.blit(textsurface, (350,370))
 			# Quit button
-			pygame.draw.rect(self.screen, (200,200,200), (225, 400, 150, 75))
-			playsurface = menufont.render("Quit", False, (0,0,0))
-			self.screen.blit(playsurface, (280,420))
+			pygame.draw.rect(self.screen, (200,200,200), (225, 450, 150, 75))
+			textsurface = menufont.render("Quit", False, (0,0,0))
+			self.screen.blit(textsurface, (280,470))
 		pygame.display.update()
 	
 	def on_cleanup(self):
